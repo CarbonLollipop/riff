@@ -1,5 +1,5 @@
-# riff
-A CLI music player
+# riff 🎶
+A CLI music player!
 
 ## Current Features
 - Error Handling
@@ -10,3 +10,4 @@ A CLI music player
 - Playlists
 - Nicer Interface
 - Discord Rich Presence (?)
+- Lyrics (???)
