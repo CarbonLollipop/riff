@@ -2,6 +2,7 @@
 #include <signal.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
+#include <ncurses.h>
 
 void sigint_handler(int sig) {
     // TODO Hide that pesky little ^C
@@ -11,8 +12,6 @@ void sigint_handler(int sig) {
 }
 
 int main(int argc, char* argv[]) {
-    signal(SIGINT, SIG_IGN);
- 
     if (argc != 2) {
         printf("Usage: %s <song>\n", argv[0]);
         return 1;
@@ -38,10 +37,25 @@ int main(int argc, char* argv[]) {
     }
     
     Mix_PlayMusic(music, 1);
+
+    initscr();
+    noecho();   
+
+    printw("Playing %s\n", argv[1]);
+    printw("P to pause/resume\n");
+
     while (Mix_PlayingMusic()) {
+        if (getch() == 'p') {
+            if (Mix_PausedMusic()) {
+                Mix_ResumeMusic();
+            } else {
+                Mix_PauseMusic();
+            }
+        }
         SDL_Delay(100);
     }
-    
+   
+    endwin();
     Mix_FreeMusic(music);
     Mix_CloseAudio();
     SDL_Quit();
