@@ -8,4 +8,5 @@ A CLI music player
 
 ## Planned Features
 - Playlists
-- Nicer interface
+- Nicer Interface
+- Discord Rich Presence (?)
