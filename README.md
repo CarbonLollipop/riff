@@ -2,12 +2,13 @@
 A CLI music player!
 
 ## Current Features
-- Error Handling
-- Playing Audio
-- Handling SIGINTs
+- Playing
+- Pausing
+- Skipping
+- Playlists (kind of work but buggy)
 
 ## Planned Features
-- Playlists
-- Nicer Interface
+- Show Audio Length
+- More Controls
 - Discord Rich Presence (?)
 - Lyrics (???)
