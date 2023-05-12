@@ -8,8 +8,14 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 
-void sigint_handler(int sig) {
+void quit() {
     printf("Bye!");
+    
+    endwin();
+    
+    Mix_CloseAudio();
+    SDL_Quit();
+    
     exit(0);
 }
 
@@ -19,7 +25,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    signal(SIGINT, sigint_handler);
+    signal(SIGINT, quit);
 
     // Do I like this? No. Does it work?
 
@@ -66,7 +72,11 @@ int main(int argc, char* argv[]) {
     initscr();
     nodelay(stdscr, TRUE);
     noecho();
-   
+  
+    printw("(P)ause/(P)lay\n");
+    printw("(S)kip\n");
+    printw("(Q)uit\n\n");
+
     for(int i = 0; i < sizeof songs / sizeof songs[0]; i++) {
         Mix_Music* music = Mix_LoadMUS(songs[i]);
         
@@ -77,9 +87,7 @@ int main(int argc, char* argv[]) {
 
         Mix_PlayMusic(music, 0);
 
-        printw("Playing %s\n", songs[i]);
-        printw("P to Pause/Play\n");
-        printw("Q to Quit\n");
+        printw("Now playing %s\n", songs[i]);
 
         while (Mix_PlayingMusic()) {
             SDL_Delay(1);
@@ -89,16 +97,14 @@ int main(int argc, char* argv[]) {
             if (c == 'p')
                 Mix_PausedMusic() ? Mix_ResumeMusic() : Mix_PauseMusic();
             else if(c == 'q')
-                return 0;
+                quit();
+            else if(c == 's')
+                Mix_HaltMusic();
         }
     
         Mix_FreeMusic(music);
     }
 
-    endwin();
-    Mix_CloseAudio();
-    SDL_Quit();
-    
-    return 0;
+    quit();
 }
 
