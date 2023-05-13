@@ -82,14 +82,15 @@ int main(int argc, char* argv[]) {
 
         initscr();
         nodelay(stdscr, TRUE);
+        keypad(stdscr, TRUE);
         noecho();
         curs_set(0); 
 
         if(songs > 1)
-        printw("  S   Skip\n");
-        printw("  P   Pause/Play\n");
-        printw("  Q   Quit\n");
-        printw(" + - Adjust volume\n\n");
+        printw("  S                    Skip\n");
+        printw("  Spacebar             Pause/Play\n");
+        printw("  Q                    Quit\n");
+        printw("  Up/Down Arrow        Adjust volume\n\n");
 
         int volume = 128;
 
@@ -112,9 +113,9 @@ int main(int argc, char* argv[]) {
             while (Mix_PlayingMusic()) {
                 SDL_Delay(1);
                 
-                char c = getch();
+                int c = getch();
 
-                if (c == 'p') {
+                if (c == 'p' || c == ' ') {
                     if(paused) {
                         Mix_VolumeMusic(volume);
                         SDL_Delay(3);
@@ -131,13 +132,13 @@ int main(int argc, char* argv[]) {
                     quit();
                 } else if(c == 's' && songs > 1) {
                     Mix_HaltMusic();
-                } else if(c == '-') {
+                } else if(c == KEY_DOWN) {
                     if(volume >= 16) {
                         volume -= 16;
                         Mix_VolumeMusic(volume); 
                     }
                     update(volume, songName, paused);
-                } else if(c == '+') {
+                } else if(c == KEY_UP) {
                     if(volume < 128) {
                         volume += 16;
                         Mix_VolumeMusic(volume); 
