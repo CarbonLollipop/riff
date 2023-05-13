@@ -12,8 +12,6 @@ void quit() {
     
     endwin();
    
-    printf("Bye!\n");
-
     Mix_CloseAudio();
     SDL_Quit();
     
@@ -38,35 +36,38 @@ int main(int argc, char* argv[]) {
    
     signal(SIGINT, quit);
 
-    // TODO make this dynamic
+    // FIXME make me dynamic!!!!!!!
     
-    char queue[256][256];
+    char queue[64][256];
 
+        uint songs = 0;
     for(int i = 1; i < argc; i++) {
 
         struct stat sb;
 
         if (stat(argv[i], &sb) == 0 && S_ISDIR(sb.st_mode)) {
-            int numSongs = 0;
-
             struct dirent* file;
 
             DIR* directory = opendir(argv[i]);
 
-            while ((file = readdir(directory)) != NULL && numSongs < 256) {
+            while ((file = readdir(directory)) != NULL ) {
                 const char* extension = strrchr(file->d_name, '.');
-                if (extension != NULL && (strcmp(extension, ".mp3") == 0 || strcmp(extension, ".wav") == 0 || strcmp(extension, ".flac") == 0)) {
-                    queue[numSongs] = ;
-                    strncpy(queue[numSongs], file->d_name, 255);
-                    queue[numSongs][255] = '\0';
 
-                    numSongs++;
+                if (extension != NULL && (strcmp(extension, ".mp3") == 0 || strcmp(extension, ".wav") == 0 || strcmp(extension, ".flac") == 0)) {
+                    char resolvedPath[256];
+                    realpath(argv[i], resolvedPath);
+                    
+                    strcat(resolvedPath, "/");
+                    char* fullname = strcat(resolvedPath, file->d_name);
+                    strncpy(queue[songs], fullname, 255);
+                    songs++;
                 }
             }
 
             closedir(directory);
-        } else if (stat(argv[1], &sb) == 0 && S_ISREG(sb.st_mode)) {
-            queue[i] = argv[i];
+        } else if (stat(argv[i], &sb) == 0 && S_ISREG(sb.st_mode)) {
+            strncpy(queue[songs], argv[i], 255);
+            songs++;
         }
     }
 
@@ -78,7 +79,7 @@ int main(int argc, char* argv[]) {
     printw("(S)kip\n");
     printw("(Q)uit\n-------\n");
 
-    for(int i = 0; i < sizeof queue / sizeof queue[0]; i++) {
+    for(int i = 0; i < songs; i++) {
         Mix_Music* music = Mix_LoadMUS(queue[i]);
         
         if (!music) {
@@ -88,21 +89,25 @@ int main(int argc, char* argv[]) {
 
         Mix_PlayMusic(music, 0);
 
-        printw("Now playing %s\n", queue[i]);
+        printw("Now playing %s", queue[i]);
 
         while (Mix_PlayingMusic()) {
             SDL_Delay(1);
             
             char c = getch();
 
-            if (c == 'p')
+            if (c == 'p') {
                 Mix_PausedMusic() ? Mix_ResumeMusic() : Mix_PauseMusic();
-            else if(c == 'q')
+            } else if(c == 'q') {
                 quit();
-            else if(c == 's')
+            } else if(c == 's') {
                 Mix_HaltMusic();
+            }
         }
-    
+
+        deleteln();
+        move(getcury(stdscr), 0);
+   
         Mix_FreeMusic(music);
     }
 
