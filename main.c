@@ -74,10 +74,10 @@ int main(int argc, char* argv[]) {
     nodelay(stdscr, TRUE);
     noecho();
   
-    printw("P to pause/play\n");
-    printw("S to skip\n");
-    printw("Q to quit\n");
-    printw("+ / - To adjust volume\n");
+    printw("P     Pause/Play\n");
+    printw("S     Skip\n");
+    printw("Q     Quit\n");
+    printw("+ / - Adjust volume\n\n");
 
     for(int i = 0; i < songs; i++) {
         Mix_Music* music = Mix_LoadMUS(queue[i]);
@@ -89,7 +89,8 @@ int main(int argc, char* argv[]) {
 
         Mix_PlayMusic(music, 0);
 
-        printw("Now playing %s", queue[i]);
+        const char* songName = strrchr(queue[i], '/')+1;
+        printw("|| %s", songName);
 
         while (Mix_PlayingMusic()) {
             SDL_Delay(1);
@@ -97,7 +98,17 @@ int main(int argc, char* argv[]) {
             char c = getch();
 
             if (c == 'p') {
-                Mix_PausedMusic() ? Mix_ResumeMusic() : Mix_PauseMusic();
+                deleteln();
+                move(getcury(stdscr), 0);
+                if(Mix_PausedMusic()) {
+                    Mix_ResumeMusic();
+                    printw("||");
+                } else {
+                    Mix_PauseMusic();
+                    printw("> ");
+                }
+                   
+                printw(" %s", songName);
             } else if(c == 'q') {
                 quit();
             } else if(c == 's') {
