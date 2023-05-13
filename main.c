@@ -8,7 +8,13 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 
-void update(int volume, const char* songName, int paused) {
+int compare(const void* a, const void* b) {
+    const char* str1 = *(const char**)a;
+    const char* str2 = *(const char**)b;
+    return strcmp(str1, str2);
+}
+
+void update(int volume, const char* songName, int paused, Mix_Music *music) {
     deleteln();
     move(getcury(stdscr), 0);
     printw("%d \"%s\" ", volume, songName);
@@ -43,117 +49,114 @@ int main(int argc, char* argv[]) {
 
     signal(SIGINT, quit);
 
-    // FIXME make me dynamic!!!!!!!
+    char* queue[256];
+
+    // FIXME ./riff ./sound.mp3 WORKS BUT ./riff sound.mp3 DOES NOT
+
+    unsigned int songs = 0;
+    
+    for(int i = 1; i < argc; i++) {
+
+        struct stat sb;
+
+        if (stat(argv[i], &sb) == 0 && S_ISDIR(sb.st_mode)) {
+            struct dirent* file;
+
+            DIR* directory = opendir(argv[i]);
+
+            while ((file = readdir(directory)) != NULL ) {
+                const char* extension = strrchr(file->d_name, '.');
+
+                if (extension != NULL && (strcmp(extension, ".mp3") == 0 || strcmp(extension, ".wav") == 0 || strcmp(extension, ".flac") == 0)) {
+                    char resolvedPath[256];
+                    realpath(argv[i], resolvedPath);
+                    
+                    strcat(resolvedPath, "/");
+                    char* fullname = strcat(resolvedPath, file->d_name);
+                    strncpy(queue[songs], fullname, 255);
+                    songs++;
+                }
+            }
+
+            closedir(directory);
+        } else if (stat(argv[i], &sb) == 0 && S_ISREG(sb.st_mode)) {
+            queue[songs] = (char*)malloc(64 * sizeof(char));
+            strcpy(queue[songs], argv[i]);
+            songs++;
+        }
+    }
+
+    initscr();
+    nodelay(stdscr, TRUE);
+    keypad(stdscr, TRUE);
+    noecho();
+    curs_set(0); 
+
+    if(songs > 1)
+        printw("S                    Skip\n");
+    printw("Spacebar             Pause/Play\n");
+    printw("Q                    Quit\n");
+    printw("Up/Down Arrow        Adjust volume\n\n");
+
+    int volume = 128;
+
+    for(int i = 0; i < songs; i++) {
+        Mix_Music* music = Mix_LoadMUS(queue[i]);
         
-        char queue[64][256];
+        if (!music) {
+            printf("%s", Mix_GetError());
+            return 1;
+        }
 
-        // FIXME ./riff ./sound.mp3 WORKS BUT ./riff sound.mp3 DOES NOT
+        Mix_PlayMusic(music, 0);
+        
+        int paused = 0;
 
-            uint songs = 0;
-        for(int i = 1; i < argc; i++) {
+        const char* songName = strrchr(queue[i], '/') + 1;
+        
+        update(volume, songName, paused, music);
 
-            struct stat sb;
+        while (Mix_PlayingMusic()) {
+            SDL_Delay(1);
+            
+            int c = getch();
 
-            if (stat(argv[i], &sb) == 0 && S_ISDIR(sb.st_mode)) {
-                struct dirent* file;
-
-                DIR* directory = opendir(argv[i]);
-
-                while ((file = readdir(directory)) != NULL ) {
-                    const char* extension = strrchr(file->d_name, '.');
-
-                    if (extension != NULL && (strcmp(extension, ".mp3") == 0 || strcmp(extension, ".wav") == 0 || strcmp(extension, ".flac") == 0)) {
-                        char resolvedPath[256];
-                        realpath(argv[i], resolvedPath);
-                        
-                        strcat(resolvedPath, "/");
-                        char* fullname = strcat(resolvedPath, file->d_name);
-                        strncpy(queue[songs], fullname, 255);
-                        songs++;
-                    }
+            if (c == ' ') {
+                if(paused) {
+                    Mix_VolumeMusic(volume);
+                    SDL_Delay(3);
+                    Mix_ResumeMusic();
+                    paused = 0;
+                } else {
+                    Mix_VolumeMusic(0);
+                    SDL_Delay(3);
+                    Mix_PauseMusic();
+                    paused = 1;
+                }
+                update(volume, songName, paused, music);
+            } else if(c == 'q') {
+                quit();
+            } else if(c == 's' && songs > 1) {
+                Mix_HaltMusic();
+            } else if(c == KEY_DOWN) {
+                if(volume >= 16) {
+                    volume -= 16;
+                    Mix_VolumeMusic(volume); 
+                }
+                update(volume, songName, paused, music);
+            } else if(c == KEY_UP) {
+                if(volume < 128) {
+                    volume += 16;
+                    Mix_VolumeMusic(volume); 
                 }
 
-                closedir(directory);
-            } else if (stat(argv[i], &sb) == 0 && S_ISREG(sb.st_mode)) {
-                strncpy(queue[songs], argv[i], 255);
-                songs++;
+                update(volume, songName, paused, music);
             }
         }
 
-        initscr();
-        nodelay(stdscr, TRUE);
-        keypad(stdscr, TRUE);
-        noecho();
-        curs_set(0); 
+        Mix_FreeMusic(music);
+    }
 
-        if(songs > 1)
-        printw("  S                    Skip\n");
-        printw("  Spacebar             Pause/Play\n");
-        printw("  Q                    Quit\n");
-        printw("  Up/Down Arrow        Adjust volume\n\n");
-
-        int volume = 128;
-
-        for(int i = 0; i < songs; i++) {
-            Mix_Music* music = Mix_LoadMUS(queue[i]);
-            
-            if (!music) {
-                printf("%s", Mix_GetError());
-                return 1;
-            }
-
-            Mix_PlayMusic(music, 0);
-            
-            int paused = 0;
-
-            const char* songName = strrchr(queue[i], '/')+1;
-            
-            update(volume, songName, paused);
-
-            while (Mix_PlayingMusic()) {
-                SDL_Delay(1);
-                
-                int c = getch();
-
-                if (c == 'p' || c == ' ') {
-                    if(paused) {
-                        Mix_VolumeMusic(volume);
-                        SDL_Delay(3);
-                        Mix_ResumeMusic();
-                        paused = 0;
-                    } else {
-                        Mix_VolumeMusic(0);
-                        SDL_Delay(3);
-                        Mix_PauseMusic();
-                        paused = 1;
-                    }
-                    update(volume, songName, paused);
-                } else if(c == 'q') {
-                    quit();
-                } else if(c == 's' && songs > 1) {
-                    Mix_HaltMusic();
-                } else if(c == KEY_DOWN) {
-                    if(volume >= 16) {
-                        volume -= 16;
-                        Mix_VolumeMusic(volume); 
-                    }
-                    update(volume, songName, paused);
-                } else if(c == KEY_UP) {
-                    if(volume < 128) {
-                        volume += 16;
-                        Mix_VolumeMusic(volume); 
-                    }
-
-                    update(volume, songName, paused);
-                }
-            }
-
-            deleteln();
-            move(getcury(stdscr), 0);
-       
-            Mix_FreeMusic(music);
-        }
-
-        quit();
+    quit();
 }
 
