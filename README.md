@@ -5,10 +5,12 @@ A CLI music player!
 - Playing
 - Pausing
 - Skipping
-- Playlists (kind of work but buggy)
+- Playlists
 
 ## Planned Features
 - Show Audio Length
 - More Controls
 - Discord Rich Presence (?)
 - Lyrics (???)
+- REMOVE HAX (?????????)
+
