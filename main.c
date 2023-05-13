@@ -38,31 +38,36 @@ int main(int argc, char* argv[]) {
    
     signal(SIGINT, quit);
 
-    struct stat sb;
+    // TODO make this dynamic
+    
+    char queue[256][256];
 
-    char* queue[256];
+    for(int i = 1; i < argc; i++) {
 
-    if (stat(argv[1], &sb) == 0 && S_ISDIR(sb.st_mode)) {
-        int numSongs = 0;
+        struct stat sb;
 
-        struct dirent* file;
+        if (stat(argv[i], &sb) == 0 && S_ISDIR(sb.st_mode)) {
+            int numSongs = 0;
 
-        DIR* directory = opendir(argv[1]);
+            struct dirent* file;
 
-        while ((file = readdir(directory)) != NULL && numSongs < 256) {
-            const char* extension = strrchr(file->d_name, '.');
-            if (extension != NULL && (strcmp(extension, ".mp3") == 0 || strcmp(extension, ".wav") == 0 || strcmp(extension, ".flac") == 0)) {
-                queue[numSongs] = (char*) malloc(256 * sizeof(char));
-                strncpy(queue[numSongs], file->d_name, 255);
-                queue[numSongs][255] = '\0';
+            DIR* directory = opendir(argv[i]);
 
-                numSongs++;
+            while ((file = readdir(directory)) != NULL && numSongs < 256) {
+                const char* extension = strrchr(file->d_name, '.');
+                if (extension != NULL && (strcmp(extension, ".mp3") == 0 || strcmp(extension, ".wav") == 0 || strcmp(extension, ".flac") == 0)) {
+                    queue[numSongs] = ;
+                    strncpy(queue[numSongs], file->d_name, 255);
+                    queue[numSongs][255] = '\0';
+
+                    numSongs++;
+                }
             }
-        }
 
-        closedir(directory);
-    } else if (stat(argv[1], &sb) == 0 && S_ISREG(sb.st_mode)) {
-        queue[0] = argv[1];
+            closedir(directory);
+        } else if (stat(argv[1], &sb) == 0 && S_ISREG(sb.st_mode)) {
+            queue[i] = argv[i];
+        }
     }
 
     initscr();
