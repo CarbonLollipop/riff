@@ -6,6 +6,7 @@ A CLI music player!
 - Pausing
 - Skipping
 - Playlists
+- Volume Controls
 
 ## Planned Features
 - Show Audio Length

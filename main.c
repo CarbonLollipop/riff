@@ -9,7 +9,6 @@
 #include <SDL2/SDL_mixer.h>
 
 void quit() {
-    
     endwin();
    
     Mix_CloseAudio();
@@ -75,9 +74,10 @@ int main(int argc, char* argv[]) {
     nodelay(stdscr, TRUE);
     noecho();
   
-    printw("(P)ause/(P)lay\n");
-    printw("(S)kip\n");
-    printw("(Q)uit\n-------\n");
+    printw("P to pause/play\n");
+    printw("S to skip\n");
+    printw("Q to quit\n");
+    printw("+ / - To adjust volume\n");
 
     for(int i = 0; i < songs; i++) {
         Mix_Music* music = Mix_LoadMUS(queue[i]);
@@ -102,6 +102,12 @@ int main(int argc, char* argv[]) {
                 quit();
             } else if(c == 's') {
                 Mix_HaltMusic();
+            } else if(c == '-') {
+                if(Mix_VolumeMusic(-1) >= 16)
+                Mix_VolumeMusic(Mix_VolumeMusic(-1) - 16);
+            }  else if(c == '+') {
+                if(Mix_VolumeMusic(-1) <= 128)
+                Mix_VolumeMusic(Mix_VolumeMusic(-1) + 16);
             }
         }
 
