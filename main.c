@@ -39,6 +39,8 @@ int main(int argc, char* argv[]) {
     
     char queue[64][256];
 
+    // FIXME ./riff ./sound.mp3 WORKS BUT ./riff sound.mp3 DOES NOT
+
         uint songs = 0;
     for(int i = 1; i < argc; i++) {
 
@@ -73,10 +75,12 @@ int main(int argc, char* argv[]) {
     initscr();
     nodelay(stdscr, TRUE);
     noecho();
-  
-    printw("P     Pause/Play\n");
-    printw("S     Skip\n");
-    printw("Q     Quit\n");
+    curs_set(0); 
+
+    if(songs > 1)
+    printw("  S   Skip\n");
+    printw("  P   Pause/Play\n");
+    printw("  Q   Quit\n");
     printw("+ / - Adjust volume\n\n");
 
     for(int i = 0; i < songs; i++) {
@@ -92,6 +96,9 @@ int main(int argc, char* argv[]) {
         const char* songName = strrchr(queue[i], '/')+1;
         printw("|| %s", songName);
 
+        int volume = 128;
+        int paused = 0;
+
         while (Mix_PlayingMusic()) {
             SDL_Delay(1);
             
@@ -100,25 +107,34 @@ int main(int argc, char* argv[]) {
             if (c == 'p') {
                 deleteln();
                 move(getcury(stdscr), 0);
-                if(Mix_PausedMusic()) {
+                if(paused) {
+                    Mix_VolumeMusic(volume);
+                    SDL_Delay(3);
                     Mix_ResumeMusic();
                     printw("||");
+                    paused = 0;
                 } else {
+                    Mix_VolumeMusic(0);
+                    SDL_Delay(3);
                     Mix_PauseMusic();
                     printw("> ");
+                    paused = 1;
                 }
-                   
                 printw(" %s", songName);
             } else if(c == 'q') {
                 quit();
-            } else if(c == 's') {
+            } else if(c == 's' && songs > 1) {
                 Mix_HaltMusic();
             } else if(c == '-') {
-                if(Mix_VolumeMusic(-1) >= 16)
-                Mix_VolumeMusic(Mix_VolumeMusic(-1) - 16);
-            }  else if(c == '+') {
-                if(Mix_VolumeMusic(-1) <= 128)
-                Mix_VolumeMusic(Mix_VolumeMusic(-1) + 16);
+                if(volume >= 16) {
+                    volume -= 16;
+                    Mix_VolumeMusic(volume); 
+                }
+            } else if(c == '+') {
+                if(volume <= 128) {
+                    volume += 16;
+                    Mix_VolumeMusic(volume); 
+                }
             }
         }
 
