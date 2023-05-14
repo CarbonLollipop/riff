@@ -68,10 +68,10 @@ int main(int argc, char* argv[]) {
                 const char* extension = strrchr(file->d_name, '.');
 
                 if (extension != NULL && (strcmp(extension, ".mp3") == 0 || strcmp(extension, ".wav") == 0 || strcmp(extension, ".flac") == 0)) {
-                    //char resolvedPath[256];
-                    //realpath(argv[i], resolvedPath);
+                    char resolvedPath[256];
+                    realpath(argv[i], resolvedPath);
                     
-                    //strcat(resolvedPath, "/");
+                    strcat(resolvedPath, "/");
                     char* fullname = strcat(argv[i], file->d_name);
                     queue[songs] = (char*)malloc(64 * sizeof(char));
                     strcpy(queue[songs], fullname);
@@ -82,7 +82,9 @@ int main(int argc, char* argv[]) {
             closedir(directory);
         } else if (stat(argv[i], &sb) == 0 && S_ISREG(sb.st_mode)) {
             queue[songs] = (char*)malloc(64 * sizeof(char));
-            strcpy(queue[songs], argv[i]);
+            char resolvedPath[256];
+            realpath(argv[i], resolvedPath);
+            strcpy(queue[songs], resolvedPath);
             songs++;
         }
     }
