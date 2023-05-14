@@ -1,6 +1,7 @@
 # riff 🎶
 A speedy, buggy CLI music player
-<video src="https://carbonlollipop.com/riffdemo.mp4" width=180>
+
+https://github.com/CarbonLollipop/riff/assets/93494083/8af0170d-8498-41ac-9c0c-00937e5b0f7e
 
 ## Current Features
 - Pausing
