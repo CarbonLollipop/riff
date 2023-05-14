@@ -105,15 +105,16 @@ int main(int argc, char* argv[]) {
     curs_set(0); 
 
     if(songs > 1) {
-        printw("N                Skip\n");
-        printw("P            Previous\n");
+        printw("N                Next\n");
+        printw("P                Previous\n");
     }
     printw("Spacebar         Pause/Play\n");
     printw("Q                Quit\n");
     printw("Up/Down Arrow    Adjust volume\n\n");
 
     int volume = 128;
-
+    int paused = 0;
+   
     for(int i = 0; i < songs; i++) {
         Mix_Music* music = Mix_LoadMUS(queue[i]);
         
@@ -124,8 +125,6 @@ int main(int argc, char* argv[]) {
 
         Mix_PlayMusic(music, 0);
         
-        int paused = 0;
-
         const char* songName = strrchr(queue[i], '/') + 1;
         
         update(volume, songName, paused, music);
@@ -150,8 +149,11 @@ int main(int argc, char* argv[]) {
                 update(volume, songName, paused, music);
             } else if(c == 'q') {
                 quit();
-            } else if(c == 's' && songs > 1) {
+            } else if(c == 'n' && songs > 1) {
                 Mix_HaltMusic();
+            } else if(c == 'p' && songs > 1 && i > 0) {
+                Mix_HaltMusic();
+                i -= 2;
             } else if(c == KEY_DOWN) {
                 if(volume >= 16) {
                     volume -= 16;
