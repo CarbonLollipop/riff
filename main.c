@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
                     realpath(argv[i], resolvedPath);
                     
                     strcat(resolvedPath, "/");
-                    char* fullname = strcat(argv[i], file->d_name);
+                    char* fullname = strcat(resolvedPath, file->d_name);
                     queue[songs] = (char*)malloc(64 * sizeof(char));
                     strcpy(queue[songs], fullname);
                     songs++;
