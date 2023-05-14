@@ -4,6 +4,7 @@
 #include <dirent.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <stdlib.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
@@ -19,8 +20,14 @@ void sort(char* queue[], int n) {
 void update(int volume, const char* songName, int paused, Mix_Music *music) {
     deleteln();
     move(getcury(stdscr), 0);
-    printw("%d \"%s\" ", volume, songName);
-    paused ? printw(" >") : printw("||");
+    char volumeString[8];
+
+    for(int i = 0; i < 8; i++) {
+        volumeString[i] = (i < volume / 16) ? ':' : '.';
+    }
+
+    printw("%s [%s] ", songName, volumeString);
+    paused ? printw("Paused") : printw("Playing");
 }
 
 void quit() {
@@ -98,11 +105,11 @@ int main(int argc, char* argv[]) {
     curs_set(0); 
 
     if(songs > 1)
-        printw("S                    Skip\n");
+        printw("S                Skip\n");
 
-    printw("Spacebar             Pause/Play\n");
-    printw("Q                    Quit\n");
-    printw("Up/Down Arrow        Adjust volume\n\n");
+    printw("Spacebar         Pause/Play\n");
+    printw("Q                Quit\n");
+    printw("Up/Down Arrow    Adjust volume\n\n");
 
     int volume = 128;
 
