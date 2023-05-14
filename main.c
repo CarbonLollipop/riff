@@ -68,12 +68,13 @@ int main(int argc, char* argv[]) {
                 const char* extension = strrchr(file->d_name, '.');
 
                 if (extension != NULL && (strcmp(extension, ".mp3") == 0 || strcmp(extension, ".wav") == 0 || strcmp(extension, ".flac") == 0)) {
-                    char resolvedPath[256];
-                    realpath(argv[i], resolvedPath);
+                    //char resolvedPath[256];
+                    //realpath(argv[i], resolvedPath);
                     
-                    strcat(resolvedPath, "/");
-                    char* fullname = strcat(resolvedPath, file->d_name);
-                    strncpy(queue[songs], fullname, 255);
+                    //strcat(resolvedPath, "/");
+                    char* fullname = strcat(argv[i], file->d_name);
+                    queue[songs] = (char*)malloc(64 * sizeof(char));
+                    strcpy(queue[songs], fullname);
                     songs++;
                 }
             }
@@ -94,6 +95,7 @@ int main(int argc, char* argv[]) {
 
     if(songs > 1)
         printw("S                    Skip\n");
+
     printw("Spacebar             Pause/Play\n");
     printw("Q                    Quit\n");
     printw("Up/Down Arrow        Adjust volume\n\n");
