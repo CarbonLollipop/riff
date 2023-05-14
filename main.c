@@ -130,7 +130,7 @@ int main(int argc, char* argv[]) {
         update(volume, songName, paused, music);
 
         while (Mix_PlayingMusic()) {
-            SDL_Delay(1);
+            SDL_Delay(20);
             
             int c = getch();
 
