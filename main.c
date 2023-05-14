@@ -9,9 +9,11 @@
 #include <SDL2/SDL_mixer.h>
 
 int compare(const void* a, const void* b) {
-    const char* str1 = *(const char**)a;
-    const char* str2 = *(const char**)b;
-    return strcmp(str1, str2);
+    return strcmp(*(const char**)a, *(const char**)b);
+}
+
+void sort(char* queue[], int n) {
+    qsort(queue, n, sizeof(char*), compare);
 }
 
 void update(int volume, const char* songName, int paused, Mix_Music *music) {
@@ -51,8 +53,6 @@ int main(int argc, char* argv[]) {
 
     char* queue[256];
 
-    // FIXME ./riff ./sound.mp3 WORKS BUT ./riff sound.mp3 DOES NOT
-
     unsigned int songs = 0;
     
     for(int i = 1; i < argc; i++) {
@@ -88,6 +88,8 @@ int main(int argc, char* argv[]) {
             songs++;
         }
     }
+
+    sort(queue, songs);
 
     initscr();
     nodelay(stdscr, TRUE);
