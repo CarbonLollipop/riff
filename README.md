@@ -1,5 +1,6 @@
 # riff 🎶
-A CLI music player
+A speedy, buggy CLI music player
+<video src="https://carbonlollipop.com/riffdemo.mp4" width=180>
 
 ## Current Features
 - Pausing
@@ -9,7 +10,8 @@ A CLI music player
 - Segfaults/Crashes when it feels like it
 
 ## Planned Features
-- Show Audio Length
+- Progress Bar
+- Seeking
+- Reading Audio Metadata
 - Discord Rich Presence (?)
 - Lyrics (???)
-
