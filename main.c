@@ -82,6 +82,7 @@ int main(int argc, char* argv[]) {
                     strcat(resolvedPath, "/");
                     char* fullname = strcat(resolvedPath, file->d_name);
                     strcpy(queue[songs], fullname);
+                    songs++;
                 }
             }
 
@@ -91,9 +92,9 @@ int main(int argc, char* argv[]) {
             char resolvedPath[256];
             realpath(argv[i], resolvedPath);
             strcpy(queue[songs], resolvedPath);
+            songs++;
         }
 
-        songs++;
     }
 
     sort(queue, songs);
