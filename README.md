@@ -8,7 +8,6 @@ https://github.com/CarbonLollipop/riff/assets/93494083/8af0170d-8498-41ac-9c0c-0
 - Skipping
 - Playlists
 - Volume Controls
-- Segfaults/Crashes when it feels like it
 
 ## Planned Features
 - Progress Bar
