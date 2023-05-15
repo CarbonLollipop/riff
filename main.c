@@ -5,15 +5,27 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
+
+void shuffleQueue(char* queue[], int n) {
+    srand(time(NULL));
+
+    for(int i = 0; i < n; i++) {
+        int j = rand() % n;
+        char* temp = queue[i];
+        queue[i] = queue[j];
+        queue[j] = temp;
+    }
+}
 
 int compare(const void* a, const void* b) {
     return strcmp(*(const char**)a, *(const char**)b);
 }
 
-void sort(char* queue[], int n) {
+void sortQueue(char* queue[], int n) {
     qsort(queue, n, sizeof(char*), compare);
 }
 
@@ -22,9 +34,9 @@ void update(int volume, const char* songName, int paused, Mix_Music *music) {
     move(getcury(stdscr), 0);
     char volumeString[8];
 
-    for(int i = 0; i < 8; i++) {
+    // code like this makes me feel so smart
+    for(int i = 0; i < 8; i++)
         volumeString[i] = (i < volume / 16) ? ':' : '.';
-    }
 
     printw("%s [%s] ", songName, volumeString);
     paused ? printw("Paused") : printw("Playing");
@@ -61,7 +73,9 @@ int main(int argc, char* argv[]) {
     char* queue[256];
 
     unsigned int songs = 0;
-    
+   
+    int shuffle = 0;
+
     for(int i = 1; i < argc; i++) {
 
         struct stat sb;
@@ -93,11 +107,13 @@ int main(int argc, char* argv[]) {
             realpath(argv[i], resolvedPath);
             strcpy(queue[songs], resolvedPath);
             songs++;
+        } else if(argv[1][0] == '-' && argv[1][1] == 's') {
+            shuffle = 1;
         }
 
     }
 
-    sort(queue, songs);
+    shuffle ? shuffleQueue(queue, songs) : sortQueue(queue, songs);
 
     initscr();
     nodelay(stdscr, TRUE);
