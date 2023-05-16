@@ -196,6 +196,12 @@ int main(int argc, char* argv[]) {
         Mix_FreeMusic(music);
     }
 
+    nodelay(stdscr, FALSE);
+
+    clear();
+    printw("You've reached the end of the queue. Press any key to exit.");
+    getch();
+
     quit();
 }
 
