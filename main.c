@@ -29,10 +29,23 @@ void sortQueue(char* queue[], int n) {
     qsort(queue, n, sizeof(char*), compare);
 }
 
+int showingHelp = 0;
+
 void update(int volume, const char* songName, int paused, Mix_Music *music) {
-    deleteln();
-    move(getcury(stdscr), 0);
-    char volumeString[8];
+   clear();
+   
+   if(showingHelp) {
+        printw("H                Toggle Help\n");
+        printw("N                Next\n");
+        printw("P                Previous\n");
+        printw("Spacebar         Pause/Play\n");
+        printw("Q                Quit\n");
+        printw("Up/Down Arrow    Adjust volume\n\n");
+   } else {
+    printw("Press H for help\n\n");
+   }
+  
+   char volumeString[8];
 
     // code like this makes me feel so smart
     for(int i = 0; i < 8; i++)
@@ -107,10 +120,8 @@ int main(int argc, char* argv[]) {
             realpath(argv[i], resolvedPath);
             strcpy(queue[songs], resolvedPath);
             songs++;
-        } else if(argv[1][0] == '-' && argv[1][1] == 's') {
+        } else if(argv[1][0] == '-' && argv[1][1] == 's')
             shuffle = 1;
-        }
-
     }
 
     shuffle ? shuffleQueue(queue, songs) : sortQueue(queue, songs);
@@ -121,14 +132,6 @@ int main(int argc, char* argv[]) {
     noecho();
     curs_set(0); 
 
-    if(songs > 1) {
-        printw("N                Next\n");
-        printw("P                Previous\n");
-    }
-    printw("Spacebar         Pause/Play\n");
-    printw("Q                Quit\n");
-    printw("Up/Down Arrow    Adjust volume\n\n");
-
     int volume = 128;
     int paused = 0;
    
@@ -136,7 +139,7 @@ int main(int argc, char* argv[]) {
         Mix_Music* music = Mix_LoadMUS(queue[i]);
         
         if (!music) {
-            printf("%s", Mix_GetError());
+            printw("%s", Mix_GetError());
             return 1;
         }
 
@@ -182,7 +185,10 @@ int main(int argc, char* argv[]) {
                     volume += 16;
                     Mix_VolumeMusic(volume); 
                 }
-
+                
+                update(volume, songName, paused, music);
+            } else if(c == 'h') {
+                showingHelp = (showingHelp == 1) ? 0 : 1;
                 update(volume, songName, paused, music);
             }
         }
