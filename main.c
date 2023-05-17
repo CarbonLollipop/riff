@@ -42,7 +42,7 @@ void update(int volume, const char* songName, int paused, Mix_Music *music) {
         printw("Q                Quit\n");
         printw("Up/Down Arrow    Adjust volume\n\n");
    } else {
-    printw("Press H for help\n\n");
+        printw("Press H for help\n\n");
    }
   
    char volumeString[8];
@@ -84,10 +84,7 @@ int main(int argc, char* argv[]) {
     signal(SIGINT, quit);
 
     char* queue[256];
-
     unsigned int songs = 0;
-   
-    int shuffle = 0;
 
     for(int i = 1; i < argc; i++) {
 
@@ -120,11 +117,10 @@ int main(int argc, char* argv[]) {
             realpath(argv[i], resolvedPath);
             strcpy(queue[songs], resolvedPath);
             songs++;
-        } else if(argv[1][0] == '-' && argv[1][1] == 's')
-            shuffle = 1;
+        }
     }
 
-    shuffle ? shuffleQueue(queue, songs) : sortQueue(queue, songs);
+    (argv[1][0] == '-' && argv[1][1] == 's') ? shuffleQueue(queue, songs) : sortQueue(queue, songs);
 
     initscr();
     nodelay(stdscr, TRUE);
