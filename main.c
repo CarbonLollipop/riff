@@ -40,17 +40,6 @@ int showingHelp = 0;
 
 void update(int volume, const char* songName, int paused, Mix_Music *music, double duration, int elapsed) {
    clear();
-   
-   if(showingHelp) {
-        printw("H                Toggle Help\n");
-        printw("N                Next\n");
-        printw("P                Previous\n");
-        printw("Spacebar         Pause/Play\n");
-        printw("Q                Quit\n");
-        printw("Up/Down Arrow    Adjust volume\n\n");
-   } else {
-        printw("Press H for help\n\n");
-   }
   
    char volumeString[8];
 
@@ -62,10 +51,26 @@ void update(int volume, const char* songName, int paused, Mix_Music *music, doub
     formatTime(elapsed, &elapsedMinutes, &elapsedSeconds);
     formatTime((int)duration, &durationMinutes, &durationSeconds);
     
-    // this is ugly!!
+    printw("%s [%s] \n\n", songName, volumeString);
 
-    printw("%02i:%02i / %02i:%02i %s [%s] ", elapsedMinutes, elapsedSeconds, durationMinutes, durationSeconds, songName, volumeString);
-    paused ? printw("Paused") : printw("Playing");
+   if(showingHelp) {
+        printw("H                Toggle Help\n");
+        printw("N                Next\n");
+        printw("P                Previous\n");
+        printw("Spacebar         Pause/Play\n");
+        printw("Q                Quit\n");
+        printw("Up/Down Arrow    Adjust volume\n\n");
+   }
+
+   printw("%02i:%02i / %02i:%02i", elapsedMinutes, elapsedSeconds, durationMinutes, durationSeconds);
+  if(paused) printw(" (Paused)"); 
+    printw("\n");
+    int x, y;
+   getmaxyx(stdscr, x, y);
+
+   for(int i = 0; i < (elapsed / duration) * y; i++) {
+       printw("-");
+   }
 }
 
 double getDuration(const char* filePath) {
@@ -186,19 +191,20 @@ int main(int argc, char* argv[]) {
         int elapsedTime = 0;
         
         update(volume, songName, paused, music, duration, elapsedTime);
+while (Mix_PlayingMusic()) {
+        SDL_Delay(20);
 
-        while (Mix_PlayingMusic()) {
-            SDL_Delay(20);
-            
-            int c = getch();
-            
-            time_t currentTime = time(NULL);
-            int elapsedTime = (int)(currentTime - startTime);
-           
-            if (elapsedTime >= counter + 1) {
-                counter++;
-                update(volume, songName, paused, music, duration, elapsedTime);
-            }
+        int c = getch();
+
+        time_t currentTime = time(NULL);
+        int newElapsedTime = (int)(currentTime - startTime);
+
+        if (!paused) {
+            elapsedTime += newElapsedTime - counter;
+        }
+        update(volume, songName, paused, music, duration, elapsedTime);
+
+        counter = newElapsedTime;
 
             if (c == ' ') {
                 if(paused) {
