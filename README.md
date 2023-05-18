@@ -24,9 +24,10 @@ Good luck
 - Skipping
 - Playlists
 - Volume Controls
+- Time Elapsed and Duration
+- Progress Bar
 
 ## Planned Features
-- Progress Bar
 - Seeking
 - Reading Audio Metadata
 - Discord Rich Presence (?)
