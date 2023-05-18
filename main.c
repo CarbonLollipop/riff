@@ -242,6 +242,26 @@ int main(int argc, char * argv[]) {
             } else if (c == 'h') {
                 showingHelp = (showingHelp == 1) ? 0 : 1;
                 update(volume, songName, paused, music, duration, elapsedTime);
+            } else if (c == KEY_LEFT) {
+                if (elapsedTime < 5) {
+                    elapsedTime = 0;
+                    Mix_RewindMusic();
+                } else {
+                    elapsedTime -= 5;
+                    Mix_SetMusicPosition((double) elapsedTime / duration - 5);
+                }
+
+                update(volume, songName, paused, music, duration, elapsedTime);
+            } else if (c == KEY_RIGHT) {   
+                if (duration - elapsedTime < 5) {
+                    elapsedTime = duration;
+                    Mix_HaltMusic();
+                } else {
+                    elapsedTime += 5;
+                    Mix_SetMusicPosition((double) elapsedTime / duration + 5);
+                }
+
+                update(volume, songName, paused, music, duration, elapsedTime);
             }
         }
 
