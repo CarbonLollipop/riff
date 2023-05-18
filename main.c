@@ -55,12 +55,13 @@ void update(int volume,
     printw("%s [%s] \n\n", songName, volumeString);
 
     if (showingHelp) {
-        printw("H                Toggle Help\n");
-        printw("N                Next\n");
-        printw("P                Previous\n");
-        printw("Spacebar         Pause/Play\n");
-        printw("Q                Quit\n");
-        printw("Up/Down Arrow    Adjust volume\n\n");
+        printw("H                   Toggle Help\n");
+        printw("N                   Next\n");
+        printw("P                   Previous\n");
+        printw("Spacebar            Pause/Play\n");
+        printw("Q                   Quit\n");
+        printw("Up/Down Arrow       Adjust volume\n");
+        printw("Left/Right Arrow    Seek\n\n");
     }
 
     printw("%02i:%02i / %02i:%02i", elapsedMinutes, elapsedSeconds, durationMinutes, durationSeconds);
