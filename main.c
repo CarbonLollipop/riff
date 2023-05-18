@@ -248,17 +248,17 @@ int main(int argc, char * argv[]) {
                     Mix_RewindMusic();
                 } else {
                     elapsedTime -= 5;
-                    Mix_SetMusicPosition((double) elapsedTime / duration - 5);
+                    Mix_SetMusicPosition(elapsedTime - 5);
                 }
 
                 update(volume, songName, paused, music, duration, elapsedTime);
             } else if (c == KEY_RIGHT) {   
-                if (duration - elapsedTime < 5) {
+                if (5 > duration - elapsedTime) {
                     elapsedTime = duration;
                     Mix_HaltMusic();
                 } else {
                     elapsedTime += 5;
-                    Mix_SetMusicPosition((double) elapsedTime / duration + 5);
+                    Mix_SetMusicPosition(elapsedTime + 5);
                 }
 
                 update(volume, songName, paused, music, duration, elapsedTime);
