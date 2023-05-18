@@ -6,9 +6,16 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <time.h>
+#include <sndfile.h>
+#include <mpg123.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
+
+void formatTime(int seconds, int *minutes, int *seconds_remaining) {
+  *minutes = seconds / 60;
+  *seconds_remaining = seconds % 60;
+}
 
 void shuffleQueue(char* queue[], int n) {
     srand(time(NULL));
@@ -31,7 +38,7 @@ void sortQueue(char* queue[], int n) {
 
 int showingHelp = 0;
 
-void update(int volume, const char* songName, int paused, Mix_Music *music) {
+void update(int volume, const char* songName, int paused, Mix_Music *music, double duration, int elapsed) {
    clear();
    
    if(showingHelp) {
@@ -51,14 +58,43 @@ void update(int volume, const char* songName, int paused, Mix_Music *music) {
     for(int i = 0; i < 8; i++)
         volumeString[i] = (i < volume / 16) ? ':' : '.';
 
-    printw("%s [%s] ", songName, volumeString);
+    int elapsedMinutes, elapsedSeconds, durationMinutes, durationSeconds;
+    formatTime(elapsed, &elapsedMinutes, &elapsedSeconds);
+    formatTime((int)duration, &durationMinutes, &durationSeconds);
+    
+    // this is ugly!!
+
+    printw("%02i:%02i / %02i:%02i %s [%s] ", elapsedMinutes, elapsedSeconds, durationMinutes, durationSeconds, songName, volumeString);
     paused ? printw("Paused") : printw("Playing");
+}
+
+double getDuration(const char* filePath) {
+    const char* extension = strrchr(filePath, '.');
+    
+    if (!strcmp(extension, ".mp3")) {
+        mpg123_init();
+        mpg123_handle* handle = mpg123_new(NULL, NULL);
+        mpg123_open(handle, filePath);
+        long sampleRate = 0;
+        mpg123_getformat(handle, &sampleRate, NULL, NULL);
+        double duration = (double)mpg123_length(handle) / sampleRate;
+        mpg123_delete(handle);
+        mpg123_exit();
+        return duration;
+    } else {
+        SF_INFO sfinfo;
+        SNDFILE* sndfile = sf_open(filePath, SFM_READ, &sfinfo);
+        double duration = (double)sfinfo.frames / sfinfo.samplerate;
+        sf_close(sndfile);
+        return duration;
+    }
 }
 
 void quit() {
     endwin();
 
     Mix_CloseAudio();
+    Mix_Quit();
     SDL_Quit();
 
     curs_set(1); 
@@ -139,16 +175,30 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
+        double duration = getDuration(queue[i]);
+
         Mix_PlayMusic(music, 0);
         
         const char* songName = strrchr(queue[i], '/') + 1;
         
-        update(volume, songName, paused, music);
+        time_t startTime = time(NULL);
+        int counter = 0;
+        int elapsedTime = 0;
+        
+        update(volume, songName, paused, music, duration, elapsedTime);
 
         while (Mix_PlayingMusic()) {
             SDL_Delay(20);
             
             int c = getch();
+            
+            time_t currentTime = time(NULL);
+            int elapsedTime = (int)(currentTime - startTime);
+           
+            if (elapsedTime >= counter + 1) {
+                counter++;
+                update(volume, songName, paused, music, duration, elapsedTime);
+            }
 
             if (c == ' ') {
                 if(paused) {
@@ -162,7 +212,7 @@ int main(int argc, char* argv[]) {
                     Mix_PauseMusic();
                     paused = 1;
                 }
-                update(volume, songName, paused, music);
+                update(volume, songName, paused, music, duration, elapsedTime);
             } else if(c == 'q') {
                 quit();
             } else if(c == 'n' && songs > 1) {
@@ -175,17 +225,16 @@ int main(int argc, char* argv[]) {
                     volume -= 16;
                     Mix_VolumeMusic(volume); 
                 }
-                update(volume, songName, paused, music);
+                update(volume, songName, paused, music, duration, elapsedTime);
             } else if(c == KEY_UP) {
                 if(volume < 128) {
                     volume += 16;
                     Mix_VolumeMusic(volume); 
                 }
-                
-                update(volume, songName, paused, music);
+                update(volume, songName, paused, music, duration, elapsedTime);
             } else if(c == 'h') {
                 showingHelp = (showingHelp == 1) ? 0 : 1;
-                update(volume, songName, paused, music);
+                update(volume, songName, paused, music, duration, elapsedTime);
             }
         }
 
