@@ -38,10 +38,8 @@ void sortQueue(char * queue[], int n) {
 
 int showingHelp = 0;
 
-void update(int volume,
-    const char * songName, int paused, Mix_Music * music, double duration, int elapsed) {
+void update(int volume, const char * songName, int paused, Mix_Music * music, double duration, int elapsed) {
     clear();
-
     char volumeString[8];
 
     // code like this makes me feel so smart
@@ -205,6 +203,7 @@ int main(int argc, char * argv[]) {
         time_t startTime = time(NULL);
         int counter = 0;
         int elapsedTime = 0;
+        int nextRefreshTime = SDL_GetTicks() + 1000;
 
         update(volume, songName, paused, music, duration, elapsedTime);
         while (Mix_PlayingMusic()) {
@@ -218,7 +217,11 @@ int main(int argc, char * argv[]) {
             if (!paused) {
                 elapsedTime += newElapsedTime - counter;
             }
-            update(volume, songName, paused, music, duration, elapsedTime);
+
+            if (SDL_GetTicks() >= nextRefreshTime) {
+                update(volume, songName, paused, music, duration, elapsedTime);
+                nextRefreshTime += 1000;
+            }
 
             counter = newElapsedTime;
 
