@@ -11,8 +11,6 @@
 #include <sys/stat.h>
 #include <time.h>
 
-#include "music_queue.c"
-
 void formatTime(int seconds, int * minutes, int * seconds_remaining) {
     * minutes = seconds / 60;
     * seconds_remaining = seconds % 60;
