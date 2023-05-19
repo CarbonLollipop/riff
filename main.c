@@ -5,11 +5,13 @@
 #include <SDL2/SDL_mixer.h>
 #include <signal.h>
 #include <sndfile.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+
+#include "music_queue.c"
 
 void formatTime(int seconds, int * minutes, int * seconds_remaining) {
     * minutes = seconds / 60;
@@ -126,38 +128,52 @@ int main(int argc, char * argv[]) {
 
     signal(SIGINT, quit);
 
-    char * queue[256];
-    unsigned int songs = 0;
+    unsigned short songs = 0;
+    unsigned int cap = 16;
 
-    for (int i = 1; i < argc; i++) {
+    char **queue = malloc(cap * sizeof(char *));
 
+    for (size_t i = 1; i < argc; i++) {
         struct stat sb;
 
-        if (stat(argv[i], & sb) == 0 && S_ISDIR(sb.st_mode)) {
-            struct dirent * file;
+        if (songs >= cap) {
+            cap *= 2;
+            queue = realloc(queue, cap * sizeof(char *));
+        }
+        
+        char resolvedPath[PATH_MAX];
+        realpath(argv[i], resolvedPath);
 
-            DIR * directory = opendir(argv[i]);
+        if (stat(argv[i], &sb) == 0 && S_ISDIR(sb.st_mode)) {
+            struct dirent *file;
 
-            while ((file = readdir(directory)) != NULL) {
-                const char * extension = strrchr(file -> d_name, '.');
+            DIR *directory = opendir(argv[i]);
 
-                if (extension != NULL && (strcmp(extension, ".mp3") == 0 || strcmp(extension, ".wav") == 0 || strcmp(extension, ".flac") == 0)) {
-                    queue[songs] = (char * ) malloc(128 * sizeof(char));
-                    char resolvedPath[256];
-                    realpath(argv[i], resolvedPath);
+            while ((file = readdir(directory))) {
+                const char *type = strrchr(file->d_name, '.');
 
-                    strcat(resolvedPath, "/");
-                    char * fullname = strcat(resolvedPath, file -> d_name);
-                    strcpy(queue[songs], fullname);
+                if (type && (strcmp(type, ".mp3") == 0 || strcmp(type, ".wav") == 0 || strcmp(type, ".flac") == 0)) {
+                    char fullPath[PATH_MAX];
+                    strcpy(fullPath, resolvedPath);
+                    strcat(fullPath, "/");
+                    strcat(fullPath, file->d_name);
+                    
+                    if (songs >= cap) {
+                            cap *= 2;
+                            queue = realloc(queue, cap * sizeof(char *));
+                    }
+                    
+                    size_t realPathLen = strlen(fullPath) + 1;
+                    queue[songs] = malloc(realPathLen * sizeof(char));
+                    strcpy(queue[songs], fullPath);
                     songs++;
                 }
             }
 
             closedir(directory);
-        } else if (stat(argv[i], & sb) == 0 && S_ISREG(sb.st_mode)) {
-            queue[songs] = (char * ) malloc(128 * sizeof(char));
-            char resolvedPath[256];
-            realpath(argv[i], resolvedPath);
+        } else if (stat(argv[i], &sb) == 0 && S_ISREG(sb.st_mode)) {
+            size_t realPathLen = strlen(resolvedPath) + 1;
+            queue[songs] = (char *)malloc(realPathLen * sizeof(char));
             strcpy(queue[songs], resolvedPath);
             songs++;
         }
