@@ -12,33 +12,32 @@
 #include <time.h>
 
 void formatTime(int seconds, int * minutes, int * seconds_remaining) {
-    * minutes = seconds / 60;
-    * seconds_remaining = seconds % 60;
+    *minutes = seconds / 60;
+    *seconds_remaining = seconds % 60;
 }
 
-void shuffleQueue(char * queue[], int n) {
+void shuffleQueue(char* queue[], int n) {
     srand(time(NULL));
 
     for (int i = 0; i < n; i++) {
         int j = rand() % n;
-        char * temp = queue[i];
+        char* temp = queue[i];
         queue[i] = queue[j];
         queue[j] = temp;
     }
 }
 
-int compare(const void * a,
-    const void * b) {
-    return strcmp( * (const char ** ) a, *(const char ** ) b);
+int compare(const void* a, const void* b) {
+    return strcmp(*(const char**) a, *(const char**) b);
 }
 
 void sortQueue(char * queue[], int n) {
-    qsort(queue, n, sizeof(char * ), compare);
+    qsort(queue, n, sizeof(char*), compare);
 }
 
 int showingHelp = 0;
 
-void update(int volume, const char * songName, int paused, double duration, int elapsed) {
+void update(int volume, const char* songName, int paused, double duration, int elapsed) {
     erase();
     char volumeString[8];
 
@@ -104,7 +103,7 @@ void quit() {
     exit(0);
 }
 
-int main(int argc, char * argv[]) {
+int main(int argc, char* argv[]) {
     if (argc < 2) {
         printf("Usage: %s <song/directory of songs>\n", argv[0]);
         return 1;
@@ -125,26 +124,26 @@ int main(int argc, char * argv[]) {
     unsigned short songs = 0;
     unsigned int cap = 7;
 
-    char **queue = malloc(cap * sizeof(char *));
+    char** queue = malloc(cap * sizeof(char *));
 
     for (size_t i = 1; i < argc; i++) {
         struct stat sb;
 
         if (songs >= cap) {
             cap *= 2;
-            queue = realloc(queue, cap * sizeof(char *));
+            queue = realloc(queue, cap * sizeof(char*));
         }
         
         char resolvedPath[PATH_MAX];
         realpath(argv[i], resolvedPath);
 
         if (stat(argv[i], &sb) == 0 && S_ISDIR(sb.st_mode)) {
-            struct dirent *file;
+            struct dirent* file;
 
-            DIR *directory = opendir(argv[i]);
+            DIR* directory = opendir(argv[i]);
 
             while ((file = readdir(directory))) {
-                const char *type = strrchr(file->d_name, '.');
+                const char* type = strrchr(file->d_name, '.');
 
                 if (type && (strcmp(type, ".mp3") == 0 || strcmp(type, ".wav") == 0 || strcmp(type, ".flac") == 0)) {
                     char fullPath[PATH_MAX];
@@ -154,7 +153,7 @@ int main(int argc, char * argv[]) {
                     
                     if (songs >= cap) {
                             cap *= 2;
-                            queue = realloc(queue, cap * sizeof(char *));
+                            queue = realloc(queue, cap * sizeof(char*));
                     }
                     
                     size_t realPathLen = strlen(fullPath) + 1;
@@ -167,7 +166,7 @@ int main(int argc, char * argv[]) {
             closedir(directory);
         } else if (stat(argv[i], &sb) == 0 && S_ISREG(sb.st_mode)) {
             size_t realPathLen = strlen(resolvedPath) + 1;
-            queue[songs] = (char *)malloc(realPathLen * sizeof(char));
+            queue[songs] = (char*)malloc(realPathLen * sizeof(char));
             strcpy(queue[songs], resolvedPath);
             songs++;
         }
@@ -292,3 +291,4 @@ int main(int argc, char * argv[]) {
 
     quit();
 }
+
