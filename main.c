@@ -38,8 +38,8 @@ void sortQueue(char * queue[], int n) {
 
 int showingHelp = 0;
 
-void update(int volume, const char * songName, int paused, Mix_Music * music, double duration, int elapsed) {
-    clear();
+void update(int volume, const char * songName, int paused, double duration, int elapsed) {
+    erase();
     char volumeString[8];
 
     // code like this makes me feel so smart
@@ -62,15 +62,13 @@ void update(int volume, const char * songName, int paused, Mix_Music * music, do
         printw("Left/Right Arrow    Seek\n\n");
     }
 
-    printw("%02i:%02i / %02i:%02i", elapsedMinutes, elapsedSeconds, durationMinutes, durationSeconds);
-    if (paused) printw(" (Paused)");
-    printw("\n");
+    printw("%02i:%02i / %02i:%02i ", elapsedMinutes, elapsedSeconds, durationMinutes, durationSeconds);
+    if (paused) printw("(Paused) ");
     int x, y;
-    getmaxyx(stdscr, x, y);
+    getmaxyx(stdscr, y, x);
 
-    for (int i = 0; i < (elapsed / duration) * y; i++) {
+    for (int i = 0; i < (elapsed / duration) * x; i++)
         printw("-");
-    }
 }
 
 double getDuration(const char * filePath) {
@@ -125,7 +123,7 @@ int main(int argc, char * argv[]) {
     signal(SIGINT, quit);
 
     unsigned short songs = 0;
-    unsigned int cap = 16;
+    unsigned int cap = 7;
 
     char **queue = malloc(cap * sizeof(char *));
 
@@ -175,7 +173,7 @@ int main(int argc, char * argv[]) {
         }
     }
 
-    (argv[1][0] == '-' && argv[1][1] == 's') ? shuffleQueue(queue, songs): sortQueue(queue, songs);
+    argv[1][0] == '-' && argv[1][1] == 's' ? shuffleQueue(queue, songs): sortQueue(queue, songs);
 
     initscr();
     nodelay(stdscr, TRUE);
@@ -187,7 +185,7 @@ int main(int argc, char * argv[]) {
     int paused = 0;
 
     for (int i = 0; i < songs; i++) {
-        Mix_Music * music = Mix_LoadMUS(queue[i]);
+        Mix_Music* music = Mix_LoadMUS(queue[i]);
 
         if (!music) {
             printw("%s", Mix_GetError());
@@ -198,14 +196,14 @@ int main(int argc, char * argv[]) {
 
         Mix_PlayMusic(music, 0);
 
-        const char * songName = strrchr(queue[i], '/') + 1;
+        const char* songName = strrchr(queue[i], '/') + 1;
 
         time_t startTime = time(NULL);
         int counter = 0;
         int elapsedTime = 0;
         int nextRefreshTime = SDL_GetTicks() + 1000;
 
-        update(volume, songName, paused, music, duration, elapsedTime);
+        update(volume, songName, paused, duration, elapsedTime);
         while (Mix_PlayingMusic()) {
             SDL_Delay(20);
 
@@ -219,7 +217,7 @@ int main(int argc, char * argv[]) {
             }
 
             if (SDL_GetTicks() >= nextRefreshTime) {
-                update(volume, songName, paused, music, duration, elapsedTime);
+                update(volume, songName, paused, duration, elapsedTime);
                 nextRefreshTime += 1000;
             }
 
@@ -237,7 +235,7 @@ int main(int argc, char * argv[]) {
                     Mix_PauseMusic();
                     paused = 1;
                 }
-                update(volume, songName, paused, music, duration, elapsedTime);
+                update(volume, songName, paused, duration, elapsedTime);
             } else if (c == 'q') {
                 quit();
             } else if (c == 'n' && songs > 1) {
@@ -250,16 +248,16 @@ int main(int argc, char * argv[]) {
                     volume -= 16;
                     Mix_VolumeMusic(volume);
                 }
-                update(volume, songName, paused, music, duration, elapsedTime);
+                update(volume, songName, paused, duration, elapsedTime);
             } else if (c == KEY_UP) {
                 if (volume < 128) {
                     volume += 16;
                     Mix_VolumeMusic(volume);
                 }
-                update(volume, songName, paused, music, duration, elapsedTime);
+                update(volume, songName, paused, duration, elapsedTime);
             } else if (c == 'h') {
                 showingHelp = (showingHelp == 1) ? 0 : 1;
-                update(volume, songName, paused, music, duration, elapsedTime);
+                update(volume, songName, paused, duration, elapsedTime);
             } else if (c == KEY_LEFT) {
                 if (elapsedTime < 5) {
                     elapsedTime = 0;
@@ -269,7 +267,7 @@ int main(int argc, char * argv[]) {
                     Mix_SetMusicPosition(elapsedTime - 5);
                 }
 
-                update(volume, songName, paused, music, duration, elapsedTime);
+                update(volume, songName, paused, duration, elapsedTime);
             } else if (c == KEY_RIGHT) {   
                 if (5 > duration - elapsedTime) {
                     elapsedTime = duration;
@@ -279,7 +277,7 @@ int main(int argc, char * argv[]) {
                     Mix_SetMusicPosition(elapsedTime + 5);
                 }
 
-                update(volume, songName, paused, music, duration, elapsedTime);
+                update(volume, songName, paused, duration, elapsedTime);
             }
         }
 
