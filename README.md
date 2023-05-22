@@ -26,7 +26,7 @@ Good luck
 - Volume Controls
 - Time Elapsed and Duration
 - Progress Bar
-- Seeking
+- Seeking (buggy)
 
 ## Planned Features
 - Reading Audio Metadata
