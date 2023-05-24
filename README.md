@@ -7,7 +7,7 @@ https://github.com/CarbonLollipop/riff/assets/93494083/8af0170d-8498-41ac-9c0c-0
 ### GNU/Linux
 Install headers\
 `apt install libsdl2-mixer-2.0-0 libmpg123-dev libsndfile1-dev`\
-or (not tested)\
+or\
 `pacman -S sdl2_mixer mpg123 libsndfile`
 
 Clone the repository, compile, and run riff
