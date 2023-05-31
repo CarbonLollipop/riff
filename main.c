@@ -11,7 +11,7 @@
 #include <sys/stat.h>
 #include <time.h>
 
-void formatTime(int seconds, int * minutes, int * seconds_remaining) {
+void formatTime(int seconds, int* minutes, int* seconds_remaining) {
     *minutes = seconds / 60;
     *seconds_remaining = seconds % 60;
 }
@@ -37,7 +37,7 @@ void sortQueue(char * queue[], int n) {
 
 int showingHelp = 0;
 
-void update(int volume, const char* songName, int paused, double duration, int elapsed) {
+void update(int volume, const char* songName, int paused, int duration, double elapsed) {
     erase();
     char volumeString[8];
 
@@ -46,8 +46,8 @@ void update(int volume, const char* songName, int paused, double duration, int e
         volumeString[i] = (i < volume / 16) ? ':' : '.';
 
     int elapsedMinutes, elapsedSeconds, durationMinutes, durationSeconds;
-    formatTime(elapsed, & elapsedMinutes, & elapsedSeconds);
-    formatTime((int) duration, & durationMinutes, & durationSeconds);
+    formatTime((int)elapsed, &elapsedMinutes, &elapsedSeconds);
+    formatTime(duration, &durationMinutes, &durationSeconds);
 
     printw("%s [%s] \n\n", songName, volumeString);
 
@@ -66,6 +66,7 @@ void update(int volume, const char* songName, int paused, double duration, int e
     int x, y;
     getmaxyx(stdscr, y, x);
 
+    printw("\n");
     for (int i = 0; i < (elapsed / duration) * x; i++)
         printw("-");
 }
@@ -179,6 +180,7 @@ int main(int argc, char* argv[]) {
     keypad(stdscr, TRUE);
     noecho();
     curs_set(0);
+    start_color();
 
     int volume = 128;
     int paused = 0;
@@ -197,32 +199,20 @@ int main(int argc, char* argv[]) {
 
         const char* songName = strrchr(queue[i], '/') + 1;
 
-        time_t startTime = time(NULL);
-        int counter = 0;
-        int elapsedTime = 0;
-        int nextRefreshTime = SDL_GetTicks() + 1000;
+        // reset counter after each song
+        
+        double elapsedTime = 0;
 
         update(volume, songName, paused, duration, elapsedTime);
         while (Mix_PlayingMusic()) {
             SDL_Delay(20);
-
-            int c = getch();
-
-            time_t currentTime = time(NULL);
-            int newElapsedTime = (int)(currentTime - startTime);
-
-            if (!paused) {
-                elapsedTime += newElapsedTime - counter;
-            }
-
-            if (SDL_GetTicks() >= nextRefreshTime) {
-                update(volume, songName, paused, duration, elapsedTime);
-                nextRefreshTime += 1000;
-            }
-
-            counter = newElapsedTime;
-
-            if (c == ' ') {
+            
+            if(!paused) elapsedTime += 0.02;
+            update(volume, songName, paused, duration, elapsedTime);
+            
+            int getch = getch();
+            
+            if (getch == ' ') {
                 if (paused) {
                     Mix_VolumeMusic(volume);
                     SDL_Delay(3);
@@ -234,49 +224,38 @@ int main(int argc, char* argv[]) {
                     Mix_PauseMusic();
                     paused = 1;
                 }
-                update(volume, songName, paused, duration, elapsedTime);
-            } else if (c == 'q') {
+            } else if (getch == 'q') {
                 quit();
-            } else if (c == 'n' && songs > 1) {
+            } else if (getch == 'n' && songs > 1) {
                 Mix_HaltMusic();
-            } else if (c == 'p' && songs > 1 && i > 0) {
+            } else if (getch == 'p' && songs > 1 && i > 0) {
                 Mix_HaltMusic();
                 i -= 2;
-            } else if (c == KEY_DOWN) {
+            } else if (getch == KEY_DOWN) {
                 if (volume >= 16) {
                     volume -= 16;
                     Mix_VolumeMusic(volume);
                 }
-                update(volume, songName, paused, duration, elapsedTime);
-            } else if (c == KEY_UP) {
+            } else if (getch == KEY_UP) {
                 if (volume < 128) {
                     volume += 16;
                     Mix_VolumeMusic(volume);
                 }
-                update(volume, songName, paused, duration, elapsedTime);
-            } else if (c == 'h') {
+            } else if (getch == 'h') {
                 showingHelp = (showingHelp == 1) ? 0 : 1;
-                update(volume, songName, paused, duration, elapsedTime);
-            } else if (c == KEY_LEFT) {
-                if (elapsedTime < 5) {
-                    elapsedTime = 0;
-                    Mix_RewindMusic();
-                } else {
+            } else if (getch == KEY_LEFT) {
+                if (!(elapsedTime < 5)) {
                     elapsedTime -= 5;
-                    Mix_SetMusicPosition(elapsedTime - 5);
+                    Mix_SetMusicPosition(elapsedTime);
                 }
-
-                update(volume, songName, paused, duration, elapsedTime);
-            } else if (c == KEY_RIGHT) {   
-                if (5 > duration - elapsedTime) {
-                    elapsedTime = duration;
+            } else if (getch == KEY_RIGHT) {   
+                if (duration - elapsedTime < 5) {
                     Mix_HaltMusic();
                 } else {
                     elapsedTime += 5;
-                    Mix_SetMusicPosition(elapsedTime + 5);
+                    Mix_SetMusicPosition(elapsedTime);
                 }
 
-                update(volume, songName, paused, duration, elapsedTime);
             }
         }
 
