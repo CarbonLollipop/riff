@@ -11,8 +11,6 @@
 #include <sys/stat.h>
 #include <time.h>
 
-#include "discord_game_sdk.h"
-
 void formatTime(int seconds, int* minutes, int* seconds_remaining) {
     *minutes = seconds / 60;
     *seconds_remaining = seconds % 60;
@@ -51,7 +49,7 @@ void update(int volume, const char* songName, int paused, double duration, int e
     formatTime(elapsed, & elapsedMinutes, & elapsedSeconds);
     formatTime((int) duration, & durationMinutes, & durationSeconds);
 
-    printw("%s [%s] \n\n", songName, volumeString);
+    printw("%s \n\n", songName);
 
     if (showingHelp) {
         printw("H                   Toggle Help\n");
@@ -63,10 +61,12 @@ void update(int volume, const char* songName, int paused, double duration, int e
         printw("Left/Right Arrow    Seek\n\n");
     }
 
-    printw("%02i:%02i / %02i:%02i ", elapsedMinutes, elapsedSeconds, durationMinutes, durationSeconds);
+    printw("%02i:%02i / %02i:%02i [%s]", elapsedMinutes, elapsedSeconds, durationMinutes, durationSeconds, volumeString);
     if (paused) printw("(Paused) ");
     int x, y;
     getmaxyx(stdscr, y, x);
+
+    printw("\n");
 
     for (int i = 0; i < (elapsed / duration) * x; i++)
         printw("-");
