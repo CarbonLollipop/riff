@@ -11,7 +11,9 @@
 #include <sys/stat.h>
 #include <time.h>
 
-void formatTime(int seconds, int * minutes, int * seconds_remaining) {
+#include "discord_game_sdk.h"
+
+void formatTime(int seconds, int* minutes, int* seconds_remaining) {
     *minutes = seconds / 60;
     *seconds_remaining = seconds % 60;
 }
@@ -31,7 +33,7 @@ int compare(const void* a, const void* b) {
     return strcmp(*(const char**) a, *(const char**) b);
 }
 
-void sortQueue(char * queue[], int n) {
+void sortQueue(char* queue[], int n) {
     qsort(queue, n, sizeof(char*), compare);
 }
 
@@ -211,9 +213,8 @@ int main(int argc, char* argv[]) {
             time_t currentTime = time(NULL);
             int newElapsedTime = (int)(currentTime - startTime);
 
-            if (!paused) {
+            if (!paused)
                 elapsedTime += newElapsedTime - counter;
-            }
 
             if (SDL_GetTicks() >= nextRefreshTime) {
                 update(volume, songName, paused, duration, elapsedTime);
@@ -235,11 +236,11 @@ int main(int argc, char* argv[]) {
                     paused = 1;
                 }
                 update(volume, songName, paused, duration, elapsedTime);
-            } else if (c == 'q') {
+            } else if (c == 'q' || c == 'Q') {
                 quit();
-            } else if (c == 'n' && songs > 1) {
+            } else if ((c == 'n' || c == 'N') && songs > 1) {
                 Mix_HaltMusic();
-            } else if (c == 'p' && songs > 1 && i > 0) {
+            } else if ((c == 'p' || c == 'P') && songs > 1 && i > 0) {
                 Mix_HaltMusic();
                 i -= 2;
             } else if (c == KEY_DOWN) {
@@ -254,7 +255,7 @@ int main(int argc, char* argv[]) {
                     Mix_VolumeMusic(volume);
                 }
                 update(volume, songName, paused, duration, elapsedTime);
-            } else if (c == 'h') {
+            } else if (c == 'h' || c == 'H') {
                 showingHelp = (showingHelp == 1) ? 0 : 1;
                 update(volume, songName, paused, duration, elapsedTime);
             } else if (c == KEY_LEFT) {
@@ -263,6 +264,7 @@ int main(int argc, char* argv[]) {
                     Mix_RewindMusic();
                 } else {
                     elapsedTime -= 5;
+                    // holding left arrow key drastically increase cpu usage for some reason :/
                     Mix_SetMusicPosition(elapsedTime - 5);
                 }
 
@@ -283,11 +285,15 @@ int main(int argc, char* argv[]) {
         Mix_FreeMusic(music);
     }
 
-    nodelay(stdscr, FALSE);
+    /*
+        not sure if i should keep this or not
 
-    clear();
-    printw("You've reached the end of the queue. Press any key to exit.");
-    getch();
+        nodelay(stdscr, FALSE);
+
+        clear();
+        printw("You've reached the end of the queue. Press any key to exit.");
+        getch();
+    */
 
     quit();
 }

@@ -26,9 +26,9 @@ Good luck
 - Volume Controls
 - Time Elapsed and Duration
 - Progress Bar
-- Seeking (buggy)
+- Seeking
 
 ## Planned Features
 - Reading Audio Metadata
-- Discord Rich Presence (?)
 - Lyrics (???)
+-
