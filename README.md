@@ -6,7 +6,7 @@ https://github.com/CarbonLollipop/riff/assets/93494083/8af0170d-8498-41ac-9c0c-0
 ## Compile It
 ### GNU/Linux
 Install headers\
-`apt install libsdl2-mixer-2.0-0 libmpg123-dev libsndfile1-dev`\
+`apt install libsdl2-mixer-2.0-0 libsdl2-mixer-dev libmpg123-dev libsndfile1-dev libncurses-dev g++`\
 or\
 `pacman -S sdl2_mixer mpg123 libsndfile`
 
