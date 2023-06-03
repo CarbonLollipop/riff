@@ -7,6 +7,9 @@ riff: main.o
 main.o: main.c
 	gcc -c -o main.o main.c
 
+install:
+	sudo cp riff /usr/local/bin/
+
 clean:
 	rm -f riff main.o
 
