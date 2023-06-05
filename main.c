@@ -62,7 +62,7 @@ void update(int volume, const char* songName, int paused, double duration, int e
     }
 
     printw("%02i:%02i / %02i:%02i [%s]", elapsedMinutes, elapsedSeconds, durationMinutes, durationSeconds, volumeString);
-    if (paused) printw("(Paused) ");
+    if (paused) printw(" (Paused)");
     int x, y;
     getmaxyx(stdscr, y, x);
 
