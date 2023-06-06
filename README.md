@@ -13,7 +13,10 @@ or\
 Clone the repository, compile, and run riff
 ```
 git clone https://github.com/CarbonLollipop/riff.git
+cd riff
 make
+# optional, copy riff to /usr/local/bin/
+make install
 ./riff <song/directory of songs>
 ```
 ### Windows
